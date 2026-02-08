@@ -303,7 +303,7 @@
     });
 
     modal.addEventListener('click', function (e) {
-      if (e.target.hasAttribute('data-close')) closeModal();
+      if (e.target.closest('[data-close]')) closeModal();
     });
 
     document.getElementById('modalPrev').addEventListener('click', function () { navigateModal(-1); });
