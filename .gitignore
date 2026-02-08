@@ -1,3 +1,6 @@
 node_modules/
 .DS_Store
 .claude/settings.local.json
+data/wikidata-raw/
+data/existing-artworks.json
+data/download-failures.json

@@ -3,9 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const OBSIDIAN_BASE = '/Users/noahbrier/dev/02_Areas/Obsidian';
-const SOURCE_JSON = path.join(OBSIDIAN_BASE, '01 Projects/Public Domain Artwork Research/Analysis/all-artworks.json');
-const THUMBNAILS_DIR = path.join(OBSIDIAN_BASE, '05 Attachments/Organized/Public Domain Art/thumbnails');
+const SOURCE_JSON = path.join(__dirname, 'data', 'all-artworks.json');
+const THUMBNAILS_DIR = path.join(__dirname, 'dist', 'thumbnails');
 
 const DIST = path.join(__dirname, 'dist');
 const SRC = path.join(__dirname, 'src');
@@ -67,8 +66,19 @@ for (const a of artworks) {
 }
 console.log(`  Deduplicated: ${artworks.length} → ${deduped.length} (removed ${artworks.length - deduped.length} duplicates)`);
 
+// Filter out artworks without thumbnails
+let withThumbs = deduped;
+if (fs.existsSync(THUMBNAILS_DIR)) {
+  const thumbSet = new Set(
+    fs.readdirSync(THUMBNAILS_DIR).filter(f => f.endsWith('.jpg')).map(f => f.replace('.jpg', ''))
+  );
+  withThumbs = deduped.filter(a => thumbSet.has(a.id));
+  const removed = deduped.length - withThumbs.length;
+  if (removed > 0) console.log(`  Removed ${removed} artworks without thumbnails`);
+}
+
 // Generate trimmed data with short keys for size optimization
-const trimmed = deduped.map(a => {
+const trimmed = withThumbs.map(a => {
   const obj = {
     i: a.id,                                    // id
     t: a.title || 'Untitled',                   // title
@@ -93,31 +103,12 @@ const dataJson = JSON.stringify(trimmed);
 fs.writeFileSync(path.join(DIST, 'data.json'), dataJson);
 console.log(`  Generated data.json (${(dataJson.length / 1024).toFixed(0)}KB)`);
 
-// --- 2. Copy thumbnails ---
-console.log('Copying thumbnails...');
-const thumbFiles = fs.readdirSync(THUMBNAILS_DIR).filter(f => f.endsWith('.jpg'));
-let copied = 0;
-let missing = 0;
-
-// Build set of artwork IDs for reference
-const artworkIds = new Set(artworks.map(a => a.id));
-
-for (const file of thumbFiles) {
-  const src = path.join(THUMBNAILS_DIR, file);
-  const dest = path.join(DIST, 'thumbnails', file);
-  fs.copyFileSync(src, dest);
-  copied++;
+// --- 2. Count thumbnails ---
+let thumbCount = 0;
+if (fs.existsSync(THUMBNAILS_DIR)) {
+  thumbCount = fs.readdirSync(THUMBNAILS_DIR).filter(f => f.endsWith('.jpg')).length;
 }
-
-// Check which artworks are missing thumbnails
-const thumbSet = new Set(thumbFiles.map(f => f.replace('.jpg', '')));
-const missingThumbs = deduped.filter(a => !thumbSet.has(a.id));
-if (missingThumbs.length > 0) {
-  console.log(`  Warning: ${missingThumbs.length} artworks missing thumbnails:`);
-  missingThumbs.forEach(a => console.log(`    - ${a.id}: ${a.title}`));
-}
-
-console.log(`  Copied ${copied} thumbnails`);
+console.log(`  Thumbnails: ${thumbCount}`);
 
 // --- 3. Build index.html with inlined CSS and JS ---
 console.log('Building index.html...');
@@ -128,6 +119,16 @@ const js = fs.readFileSync(path.join(SRC, 'app.js'), 'utf-8');
 let html = htmlTemplate;
 html = html.replace('/* __CSS_INLINE__ */', css);
 html = html.replace('/* __JS_INLINE__ */', js);
+
+// Inject dynamic counts
+const museumSet = new Set(trimmed.map(a => a.u).filter(Boolean));
+const artworkCount = trimmed.length.toLocaleString();
+const museumCountStr = museumSet.size.toLocaleString();
+html = html.replace(/2,209/g, artworkCount);
+// Replace the span content first (more specific), then meta description
+html = html.replace(/>692<\/span>/g, '>' + museumCountStr + '</span>');
+html = html.replace(/692 museums/g, museumCountStr + ' museums');
+console.log(`  Injected counts: ${artworkCount} artworks, ${museumCountStr} museums`);
 
 fs.writeFileSync(path.join(DIST, 'index.html'), html);
 console.log(`  Generated index.html (${(Buffer.byteLength(html) / 1024).toFixed(0)}KB)`);
@@ -143,6 +144,6 @@ fs.writeFileSync(path.join(DIST, '_headers'), headers);
 // --- Summary ---
 console.log('\nBuild complete!');
 console.log(`  Artworks: ${trimmed.length}`);
-console.log(`  Thumbnails: ${copied}`);
-console.log(`  Missing thumbnails: ${missingThumbs.length}`);
+console.log(`  Museums: ${museumSet.size}`);
+console.log(`  Thumbnails: ${thumbCount}`);
 console.log(`  Output: ${DIST}/`);

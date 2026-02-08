@@ -2,9 +2,29 @@
   "name": "public-art",
   "version": "1.0.0",
   "private": true,
-  "description": "2,230 public domain square artworks from 692 museums worldwide",
+  "description": "Public domain square artworks from museums worldwide",
   "scripts": {
     "build": "node build.js",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "fetch-data": "tsx scripts/fetch-wikidata.ts",
+    "merge": "tsx scripts/merge-data.ts",
+    "download": "tsx scripts/download-thumbnails.ts",
+    "pipeline": "tsx scripts/fetch-wikidata.ts && tsx scripts/merge-data.ts && tsx scripts/download-thumbnails.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild"
+    ]
   }
 }

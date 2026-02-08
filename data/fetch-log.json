@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-02-08T02:19:20.177Z",
+  "batches": [
+    {
+      "name": "pre-1400",
+      "count": 125,
+      "duration": 25526
+    },
+    {
+      "name": "1400-1499",
+      "count": 347,
+      "duration": 56550
+    },
+    {
+      "name": "1500-1599",
+      "count": 649,
+      "duration": 48272
+    },
+    {
+      "name": "1600-1699",
+      "count": 1558,
+      "duration": 27197
+    },
+    {
+      "name": "1700-1799",
+      "count": 788,
+      "duration": 34163
+    },
+    {
+      "name": "1800-1899",
+      "count": 950,
+      "duration": 19631
+    },
+    {
+      "name": "1900-1934",
+      "count": 889,
+      "duration": 20164
+    },
+    {
+      "name": "1935-1951",
+      "count": 40,
+      "duration": 44056
+    },
+    {
+      "name": "1952-1969",
+      "count": 1,
+      "duration": 50017
+    },
+    {
+      "name": "no-date",
+      "count": 451,
+      "duration": 26258
+    }
+  ],
+  "totalUnique": 5776
+}
