@@ -1,0 +1,10 @@
+{
+  "name": "public-art",
+  "version": "1.0.0",
+  "private": true,
+  "description": "2,230 public domain square artworks from 692 museums worldwide",
+  "scripts": {
+    "build": "node build.js",
+    "clean": "rm -rf dist"
+  }
+}

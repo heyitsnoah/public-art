@@ -1,0 +1,4 @@
+/thumbnails/*
+  Cache-Control: public, max-age=31556952, immutable
+/data.json
+  Cache-Control: public, max-age=86400
